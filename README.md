@@ -23,16 +23,27 @@
 2. 准备存储：
 
    - 确保有足够的存储空间
-   - 创建必要的目录结构：
+   - 创建并设置媒体目录权限：
 
    ```bash
-   mkdir -p /Volumes/media/{downloads,tv,movies}
-   mkdir -p ./config/{qbittorrent,sonarr,radarr,prowlarr,chinesesubfinder,bazarr,jellyfin,overseerr}
+   # 创建媒体目录
+   sudo mkdir -p /Volumes/media/{downloads,tv,movies}
+   sudo chown -R $(id -u):$(id -g) /Volumes/media/{downloads,tv,movies}
+   ```
+
+   > 注意：在 macOS 上可能会看到一些系统文件（如 .Spotlight-V100）的权限错误，这是正常的，可以忽略
+
+   - 创建并设置配置目录权限：
+
+   ```bash
+   # 创建配置目录
+   mkdir -p ./config
+   chmod -R 777 ./config  # 确保 Docker 容器有足够的权限
    ```
 
 3. 启动服务：
    ```bash
-   docker-compose up -d
+   docker compose up -d
    ```
 
 ## 目录结构
@@ -97,3 +108,4 @@
 2. 确保所有目录有正确的读写权限
 3. 首次使用时需要分别配置各个服务
 4. 建议设置反向代理以实现远程访问
+5. macOS 用户建议使用 Jellyfin 的客户端而不是 Docker 版本，以获得更好的硬件加速支持
