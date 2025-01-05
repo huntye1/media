@@ -63,20 +63,34 @@
 
    - 访问 http://localhost:8080
    - 默认用户名: admin
-   - 默认密码: adminadmin
+   - 默认密码: `docker logs qbittorrent`获取
+   - 登录后，在 WebUI 中修改默认密码
 
 2. **Prowlarr**
 
    - 访问 http://localhost:9696
+   - 配置用户名和密码
    - 添加你的下载源
    - 配置与 Sonarr/Radarr 的连接
 
+   问题：blocked by CloudFlare Protection.
+   步骤：
+
+   - 设置 -> 索引器 -> 添加 -> FlareSolverr
+   - 输入标签「proxy」
+   - 选择 FlareSolverr 的地址和端口(http://flaresolverr:8191)
+   - 添加索引的时候，选择标签「proxy」
+
 3. **Sonarr/Radarr**
 
-   - Sonarr: http://localhost:8989
-   - Radarr: http://localhost:7878
+   - Sonarr: http://localhost:8989, 设置用户密码
+   - Radarr: http://localhost:7878, 设置用户密码
    - 配置下载器（qBittorrent）
    - 配置媒体库路径
+
+   - 配置为 Prowlarr 应用程序
+     - 设置 -> 通用 -> API 密钥，找到 sonarr/radarr 的 API 密钥
+     - 打开 prolarr 配置页面，设置 -> 应用程序，添加 sonarr/radarr，配置 API 密钥
 
 4. **Jellyfin**
 
@@ -89,10 +103,10 @@
    - Bazarr: http://localhost:6767
    - 配置字幕源和媒体库路径
 
-6. **Overseerr**
+6. **jellyseerr**
    - 访问 http://localhost:5055
    - 配置与 Jellyfin 的连接
-   - 设置用户权限
+   - 配置 sonarr/radarr
 
 ## 使用流程
 

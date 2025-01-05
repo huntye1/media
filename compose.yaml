@@ -87,6 +87,17 @@ services:
   #     - "8920:8920" # HTTPS端口（可选）
   #   restart: unless-stopped
 
+  # FlareSolverr: 用于解决 Cloudflare 验证问题（Prowlarr 部分索引需要）
+  flaresolverr:
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+    container_name: flaresolverr
+    environment:
+      - LOG_LEVEL=info
+      - TZ=Asia/Shanghai
+    ports:
+      - "8191:8191"
+    restart: unless-stopped
+
   # Prowlarr: 种子索引器，用于管理各种下载源
   prowlarr:
     image: linuxserver/prowlarr:latest
@@ -117,16 +128,16 @@ services:
       - "6767:6767" # Web界面端口
     restart: unless-stopped
 
-  # Overseerr: 媒体请求和管理系统
-  overseerr:
-    image: linuxserver/overseerr:latest
-    container_name: overseerr
+  # Jellyseerr: 媒体请求和管理系统（专为 Jellyfin 优化的 Overseerr 分支）
+  jellyseerr:
+    image: fallenbagel/jellyseerr:latest
+    container_name: jellyseerr
     environment:
       - PUID=0
       - PGID=0
       - TZ=Asia/Shanghai
     volumes:
-      - ./config/overseerr:/config # 配置文件目录
+      - ./config/jellyseerr:/app/config # 配置文件目录
     ports:
-      - "5055:5055" # Web界面端口
+      - "5055:5055" # Web界面端口（与原 Overseerr 保持相同端口）
     restart: unless-stopped
