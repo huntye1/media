@@ -57,17 +57,27 @@ services:
   # ChineseSubFinder: 中文字幕自动下载工具
   chinesesubfinder:
     image: allanpk716/chinesesubfinder:latest
-    container_name: chinesesubfinder
-    environment:
-      - PUID=0
-      - PGID=0
-      - TZ=Asia/Shanghai
     volumes:
       - ./config/chinesesubfinder:/config # 配置文件目录
       - /Volumes/media:/media # 媒体库根目录
-    ports:
-      - "19035:19035" # Web界面端口
+      - ./config/browser:/root/.cache/rod/browser # 容器重启后无需再次下载 chrome，除非 go-rod 更新
+    environment:
+      - PUID=0 # uid
+      - PGID=0 # gid
+      - PERMS=true # 是否重设/media权限
+      - TZ=Asia/Shanghai # 时区
+      - UMASK=022 # 权限掩码
     restart: unless-stopped
+    network_mode: bridge
+    hostname: chinesesubfinder
+    container_name: chinesesubfinder
+    ports:
+      - 19035:19035 # 从0.20.0版本开始，通过webui来设置
+      - 19037:19037 # webui 的视频列表读取图片用，务必设置不要暴露到外网
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m" # 限制docker控制台日志大小，可自行调整
 
   # NOTICE: 推荐使用macos的客户端，因为支持硬件加速
   # Jellyfin: 媒体服务器，用于在线播放视频
@@ -140,4 +150,15 @@ services:
       - ./config/jellyseerr:/app/config # 配置文件目录
     ports:
       - "5055:5055" # Web界面端口（与原 Overseerr 保持相同端口）
+    restart: unless-stopped
+
+  # Homepage: 导航页面服务
+  homepage:
+    image: nginx:alpine
+    container_name: homepage
+    volumes:
+      - ./config/nginx/html:/usr/share/nginx/html
+      - ./config/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "80:80"
     restart: unless-stopped
