@@ -1,0 +1,132 @@
+# 媒体服务器整体配置
+# 包含：下载工具(qBittorrent)、媒体管理(Sonarr/Radarr)、字幕工具(ChineseSubFinder/Bazarr)、媒体服务器(Jellyfin)等
+
+version: "3"
+
+services:
+  # qBittorrent: BT下载工具
+  qbittorrent:
+    image: linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    environment:
+      - PUID=0 # 运行用户ID，0为root用户
+      - PGID=0 # 运行用户组ID，0为root组
+      - TZ=Asia/Shanghai # 时区设置
+      - WEBUI_PORT=8080 # Web界面端口
+    volumes:
+      - ./config/qbittorrent:/config # 配置文件目录
+      - /Volumes/media/downloads:/downloads # 下载目录
+    ports:
+      - "8080:8080" # Web界面端口映射
+      - "6881:6881" # BT传入端口
+      - "6881:6881/udp" # BT传入端口(UDP)
+    restart: unless-stopped # 容器退出时自动重启
+
+  # Sonarr: 电视剧自动下载和管理工具
+  sonarr:
+    image: linuxserver/sonarr:latest
+    container_name: sonarr
+    environment:
+      - PUID=0
+      - PGID=0
+      - TZ=Asia/Shanghai
+    volumes:
+      - ./config/sonarr:/config # 配置文件目录
+      - /Volumes/media/downloads:/downloads # 下载目录（与qBittorrent共享）
+      - /Volumes/media/tv:/tv # 电视剧媒体库目录
+    ports:
+      - "8989:8989" # Web界面端口
+    restart: unless-stopped
+
+  # Radarr: 电影自动下载和管理工具
+  radarr:
+    image: linuxserver/radarr:latest
+    container_name: radarr
+    environment:
+      - PUID=0
+      - PGID=0
+      - TZ=Asia/Shanghai
+    volumes:
+      - ./config/radarr:/config # 配置文件目录
+      - /Volumes/media/downloads:/downloads # 下载目录（与qBittorrent共享）
+      - /Volumes/media/movies:/movies # 电影媒体库目录
+    ports:
+      - "7878:7878" # Web界面端口
+    restart: unless-stopped
+
+  # ChineseSubFinder: 中文字幕自动下载工具
+  chinesesubfinder:
+    image: allanpk716/chinesesubfinder:latest
+    container_name: chinesesubfinder
+    environment:
+      - PUID=0
+      - PGID=0
+      - TZ=Asia/Shanghai
+    volumes:
+      - ./config/chinesesubfinder:/config # 配置文件目录
+      - /Volumes/media:/media # 媒体库根目录
+    ports:
+      - "19035:19035" # Web界面端口
+    restart: unless-stopped
+
+  # NOTICE: 推荐使用macos的客户端，因为支持硬件加速
+  # Jellyfin: 媒体服务器，用于在线播放视频
+  # jellyfin:
+  #   image: jellyfin/jellyfin:latest
+  #   container_name: jellyfin
+  #   environment:
+  #     - PUID=0
+  #     - PGID=0
+  #     - TZ=Asia/Shanghai
+  #   volumes:
+  #     - ./config/jellyfin:/config # 配置文件目录
+  #     - /Volumes/media/tv:/data/tvshows # 电视剧媒体库目录
+  #     - /Volumes/media/movies:/data/movies # 电影媒体库目录
+  #   ports:
+  #     - "8096:8096" # HTTP端口
+  #     - "8920:8920" # HTTPS端口（可选）
+  #   restart: unless-stopped
+
+  # Prowlarr: 种子索引器，用于管理各种下载源
+  prowlarr:
+    image: linuxserver/prowlarr:latest
+    container_name: prowlarr
+    environment:
+      - PUID=0
+      - PGID=0
+      - TZ=Asia/Shanghai
+    volumes:
+      - ./config/prowlarr:/config # 配置文件目录
+    ports:
+      - "9696:9696" # Web界面端口
+    restart: unless-stopped
+
+  # Bazarr: 多语言字幕下载工具
+  bazarr:
+    image: linuxserver/bazarr:latest
+    container_name: bazarr
+    environment:
+      - PUID=0
+      - PGID=0
+      - TZ=Asia/Shanghai
+    volumes:
+      - ./config/bazarr:/config # 配置文件目录
+      - /Volumes/media/movies:/movies # 电影媒体库目录
+      - /Volumes/media/tv:/tv # 电视剧媒体库目录
+    ports:
+      - "6767:6767" # Web界面端口
+    restart: unless-stopped
+
+  # Overseerr: 媒体请求和管理系统
+  overseerr:
+    image: linuxserver/overseerr:latest
+    container_name: overseerr
+    environment:
+      - PUID=0
+      - PGID=0
+      - TZ=Asia/Shanghai
+    volumes:
+      - ./config/overseerr:/config # 配置文件目录
+    ports:
+      - "5055:5055" # Web界面端口
+    restart: unless-stopped
